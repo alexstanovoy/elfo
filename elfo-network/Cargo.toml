@@ -39,7 +39,7 @@ fxhash = "0.2.1"
 humantime-serde = "1"
 kanal = "0.1.1"
 bitflags = "2.3.2"
-lz4_flex = { version = "0.11.1", default-features = false, features = ["std"] }
+lz4_flex = { version = "0.13", default-features = false, features = ["std"] }
 byteorder = "1.4.3"
 turmoil06 = { package = "turmoil", version = "0.6", optional = true }
 turmoil07 = { package = "turmoil", version = "0.7", optional = true }
