@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.2.0-alpha.21] - 2026-03-27
 ### Added
 - network: add the `turmoil` v0.7 transport (the `turmoil07` feature).
 - core: integration with `tokio-console` if the `tokio_unstable` cfg and `tokio-tracing` feature are enabled. See actoromicon for details ([#173]).
@@ -765,7 +767,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Feuer Frei!
 
 <!-- next-url -->
-[Unreleased]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.20...HEAD
+[Unreleased]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.21...HEAD
+[0.2.0-alpha.21]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.20...elfo-v0.2.0-alpha.21
 [0.2.0-alpha.20]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.19...elfo-v0.2.0-alpha.20
 [0.2.0-alpha.19]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.18...elfo-v0.2.0-alpha.19
 [0.2.0-alpha.18]: https://github.com/elfo-rs/elfo/compare/elfo-v0.2.0-alpha.17...elfo-v0.2.0-alpha.18
