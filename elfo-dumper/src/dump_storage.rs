@@ -362,7 +362,7 @@ impl Drop for Drain<'_> {
 
 #[cfg(test)]
 mod tests {
-    use elfo_core::{dumping::Dump, scope::Scope, tracing::TraceId, ActorMeta, Addr};
+    use elfo_core::{ActorMeta, Addr, dumping::Dump, scope::Scope, tracing::TraceId};
 
     use super::*;
 

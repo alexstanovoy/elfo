@@ -7,9 +7,8 @@ use std::{
 };
 
 use serde::{
-    de,
+    Deserialize, Serialize, de,
     ser::{self, SerializeStruct as _, SerializeTuple as _},
-    Deserialize, Serialize,
 };
 
 use super::{Message, MessageRepr, MessageTypeId, MessageVTable};
@@ -682,9 +681,10 @@ mod tests_miri {
     fn json_nonexist() {
         let text = r#"["nonexist","NonExist",{}]"#;
         let err = serde_json::from_str::<AnyMessage>(text).unwrap_err();
-        assert!(err
-            .to_string()
-            .starts_with("unknown message: nonexist/NonExist"));
+        assert!(
+            err.to_string()
+                .starts_with("unknown message: nonexist/NonExist")
+        );
     }
 
     #[test]

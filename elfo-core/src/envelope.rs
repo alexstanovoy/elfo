@@ -3,11 +3,10 @@ use std::{alloc, fmt, mem, ptr, ptr::NonNull};
 use elfo_utils::time::Instant;
 
 use crate::{
-    mailbox,
+    Addr, mailbox,
     message::{AnyMessageRef, Message, MessageRepr, MessageTypeId, Request},
     request_table::{RequestId, ResponseToken},
     tracing::TraceId,
-    Addr,
 };
 
 /// An envelope is a wrapper around message with additional metadata,
@@ -419,7 +418,7 @@ mod tests_miri {
     use elfo_utils::time;
 
     use super::*;
-    use crate::{message, AnyMessage};
+    use crate::{AnyMessage, message};
 
     fn make_regular_envelope(message: impl Message) -> Envelope {
         // Miri doesn't support asm, so mock the time.

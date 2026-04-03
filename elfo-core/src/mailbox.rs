@@ -28,8 +28,8 @@
 use std::ptr::{self, NonNull};
 
 use cordyceps::{
-    mpsc_queue::{Links, MpscQueue},
     Linked,
+    mpsc_queue::{Links, MpscQueue},
 };
 use parking_lot::Mutex;
 use tokio::sync::{Notify, Semaphore, TryAcquireError};

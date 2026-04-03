@@ -6,7 +6,7 @@ use std::{
 };
 
 use derive_more::From;
-use futures::future::{join_all, BoxFuture};
+use futures::future::{BoxFuture, join_all};
 use idr_ebr::{BorrowedEntry, OwnedEntry};
 use pin_project::pin_project;
 use smallvec::SmallVec;

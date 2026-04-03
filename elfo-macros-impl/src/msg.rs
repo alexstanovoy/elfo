@@ -3,7 +3,7 @@ use std::{char, collections::HashMap};
 use proc_macro2::Span;
 use quote::quote_spanned;
 use syn::{
-    parse_macro_input, spanned::Spanned, Arm, ExprMatch, Ident, Pat, PatIdent, PatWild, Path, Token,
+    Arm, ExprMatch, Ident, Pat, PatIdent, PatWild, Path, Token, parse_macro_input, spanned::Spanned,
 };
 
 use crate::errors::emit_error;

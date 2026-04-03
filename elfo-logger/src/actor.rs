@@ -12,20 +12,20 @@ use tokio::{
 use tracing::Metadata;
 
 use elfo_core::{
-    message,
+    ActorGroup, Blueprint, Context, RestartParams, RestartPolicy, TerminationPolicy, message,
     messages::{ConfigUpdated, Terminate},
     msg,
     signal::{Signal, SignalKind},
-    ActorGroup, Blueprint, Context, RestartParams, RestartPolicy, TerminationPolicy,
 };
 
 use crate::{
+    PreparedEvent, Shared,
     config::{Colorization, Config, Sink},
     formatters::Formatter,
     line_buffer::LineBuffer,
     line_transaction::{FailOnUnfit, Line as _, LineFactory, TruncateOnUnfit},
     scope_filter::ScopeFilter,
-    theme, PreparedEvent, Shared,
+    theme,
 };
 
 pub(crate) struct Logger {
