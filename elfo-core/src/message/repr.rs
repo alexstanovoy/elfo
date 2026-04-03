@@ -191,29 +191,29 @@ mod vtablefns {
     /// Data behind `ptr` cannot be accessed after this call.
     /// Note that vtable is still can be accessed.
     pub(super) unsafe fn drop_data<M>(ptr: NonNull<MessageRepr>) {
-        ptr::drop_in_place(&mut ptr.cast::<MessageRepr<M>>().as_mut().data);
+        unsafe { ptr::drop_in_place(&mut ptr.cast::<MessageRepr<M>>().as_mut().data) };
     }
 
     pub(super) unsafe fn clone<M: Message>(
         ptr: NonNull<MessageRepr>,
         out_ptr: NonNull<MessageRepr>,
     ) {
-        ptr::write(
-            out_ptr.cast::<MessageRepr<M>>().as_ptr(),
-            ptr.cast::<MessageRepr<M>>().as_ref().clone(),
-        );
+        let cloned = unsafe { ptr.cast::<MessageRepr<M>>().as_ref() }.clone();
+        unsafe { ptr::write(out_ptr.cast::<MessageRepr<M>>().as_ptr(), cloned) };
     }
 
     pub(super) unsafe fn debug<M: fmt::Debug>(
         ptr: NonNull<MessageRepr>,
         f: &mut fmt::Formatter<'_>,
     ) -> fmt::Result {
-        let data = &ptr.cast::<MessageRepr<M>>().as_ref().data;
+        let data = &unsafe { ptr.cast::<MessageRepr<M>>().as_ref() }.data;
         fmt::Debug::fmt(data, f)
     }
 
     pub(super) unsafe fn erase<M: Message>(ptr: NonNull<MessageRepr>) -> dumping::ErasedMessage {
-        let data = ptr.cast::<MessageRepr<M>>().as_ref().data.clone();
+        let data = unsafe { ptr.cast::<MessageRepr<M>>().as_ref() }
+            .data
+            .clone();
         smallbox!(data)
     }
 
@@ -223,9 +223,9 @@ mod vtablefns {
     pub(super) unsafe fn as_serialize_any<M: Message>(
         ptr: NonNull<MessageRepr>,
     ) -> NonNull<dyn erased_serde::Serialize> {
-        let data = &ptr.cast::<MessageRepr<M>>().as_ref().data;
+        let data = &unsafe { ptr.cast::<MessageRepr<M>>().as_ref() }.data;
         let ser = data as &dyn erased_serde::Serialize;
-        NonNull::new_unchecked(ser as *const _ as *mut _)
+        unsafe { NonNull::new_unchecked(ser as *const _ as *mut _) }
     }
 
     pub(super) unsafe fn deserialize_any<M: Message>(
@@ -233,10 +233,12 @@ mod vtablefns {
         out_ptr: NonNull<MessageRepr>,
     ) -> Result<(), erased_serde::Error> {
         let data = erased_serde::deserialize::<M>(deserializer)?;
-        ptr::write(
-            out_ptr.cast::<MessageRepr<M>>().as_ptr(),
-            MessageRepr::new(data),
-        );
+        unsafe {
+            ptr::write(
+                out_ptr.cast::<MessageRepr<M>>().as_ptr(),
+                MessageRepr::new(data),
+            )
+        };
         Ok(())
     }
 
@@ -246,10 +248,12 @@ mod vtablefns {
             out_ptr: NonNull<MessageRepr>,
         ) -> Result<(), decode::Error> {
             let data = decode::from_slice(buffer)?;
-            ptr::write(
-                out_ptr.cast::<MessageRepr<M>>().as_ptr(),
-                MessageRepr::new(data),
-            );
+            unsafe {
+                ptr::write(
+                    out_ptr.cast::<MessageRepr<M>>().as_ptr(),
+                    MessageRepr::new(data),
+                )
+            };
             Ok(())
         }
 
@@ -258,7 +262,7 @@ mod vtablefns {
             out: &mut Vec<u8>,
             limit: usize,
         ) -> Result<(), encode::Error> {
-            let data = &ptr.cast::<MessageRepr<M>>().as_ref().data;
+            let data = &unsafe { ptr.cast::<MessageRepr<M>>().as_ref() }.data;
             let mut out = LimitedWrite(out, limit);
             encode::write_named(&mut out, data)
         }

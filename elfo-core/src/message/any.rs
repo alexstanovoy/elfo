@@ -62,8 +62,8 @@ impl AnyMessage {
     pub(super) unsafe fn into_real<M: Message>(self) -> M {
         debug_assert_ne!(M::_type_id(), Self::_type_id());
 
-        let data = M::_read(self.0);
-        dealloc_repr(self.0);
+        let data = unsafe { M::_read(self.0) };
+        unsafe { dealloc_repr(self.0) };
         mem::forget(self);
         data
     }
@@ -74,7 +74,7 @@ impl AnyMessage {
     pub(super) unsafe fn as_real_ref<M: Message>(&self) -> &M {
         debug_assert_ne!(M::_type_id(), Self::_type_id());
 
-        &self.0.cast::<MessageRepr<M>>().as_ref().data
+        &unsafe { self.0.cast::<MessageRepr<M>>().as_ref() }.data
     }
 
     /// # Safety
@@ -83,7 +83,7 @@ impl AnyMessage {
     pub(super) unsafe fn as_real_mut<M: Message>(&mut self) -> &mut M {
         debug_assert_ne!(M::_type_id(), Self::_type_id());
 
-        &mut self.0.cast::<MessageRepr<M>>().as_mut().data
+        &mut unsafe { self.0.cast::<MessageRepr<M>>().as_mut() }.data
     }
 
     /// Returns [`AnyMessageRef`] that borrows the message.
@@ -122,7 +122,7 @@ impl AnyMessage {
     pub(crate) unsafe fn downcast_ref_unchecked<M: Message>(&self) -> &M {
         // If `M != AnyMessage` then `as_real_ref()` is called.
         // Otherwise, the message is returned as is.
-        M::_from_any_ref(self)
+        unsafe { M::_from_any_ref(self) }
     }
 
     /// Tries to downcast the message to a mutable reference to the concrete
@@ -142,7 +142,7 @@ impl AnyMessage {
     pub(crate) unsafe fn downcast_mut_unchecked<M: Message>(&mut self) -> &mut M {
         // If `M != AnyMessage` then `as_real_mut()` is called.
         // Otherwise, the message is returned as is.
-        M::_from_any_mut(self)
+        unsafe { M::_from_any_mut(self) }
     }
 
     /// Tries to downcast the message to a concrete type.
@@ -162,7 +162,7 @@ impl AnyMessage {
     unsafe fn downcast_unchecked<M: Message>(self) -> M {
         // If `M != AnyMessage` then `into_real()` is called.
         // Otherwise, the message is returned as is.
-        M::_from_any(self)
+        unsafe { M::_from_any(self) }
     }
 
     /// # Safety
@@ -171,7 +171,7 @@ impl AnyMessage {
     /// where `M` is the same type that is hold by `self`.
     pub(crate) unsafe fn clone_into(&self, out_ptr: NonNull<MessageRepr>) {
         let vtable = self._vtable();
-        (vtable.clone)(self.0, out_ptr);
+        unsafe { (vtable.clone)(self.0, out_ptr) };
     }
 
     /// # Safety
@@ -179,7 +179,7 @@ impl AnyMessage {
     /// Data behind `self` cannot be accessed after this call.
     pub(crate) unsafe fn drop_in_place(&self) {
         let vtable = self._vtable();
-        (vtable.drop_data)(self.0);
+        unsafe { (vtable.drop_data)(self.0) };
     }
 
     fn as_serialize(&self) -> &(impl Serialize + ?Sized) {
@@ -236,9 +236,9 @@ fn alloc_repr(vtable: &'static MessageVTable) -> NonNull<MessageRepr> {
 /// `ptr` must denote a block of memory allocated by [`alloc_repr()`].
 unsafe fn dealloc_repr(ptr: NonNull<MessageRepr>) {
     let ptr = ptr.as_ptr();
-    let vtable = (*ptr).vtable;
+    let vtable = unsafe { (*ptr).vtable };
 
-    alloc::dealloc(ptr.cast(), vtable.repr_layout);
+    unsafe { alloc::dealloc(ptr.cast(), vtable.repr_layout) };
 }
 
 impl Message for AnyMessage {
@@ -288,27 +288,31 @@ impl Message for AnyMessage {
 
     #[inline(always)]
     unsafe fn _read(ptr: NonNull<MessageRepr>) -> Self {
-        let vtable = (*ptr.as_ptr()).vtable;
+        let vtable = unsafe { (*ptr.as_ptr()).vtable };
         let this = alloc_repr(vtable);
 
-        ptr::copy_nonoverlapping(
-            ptr.cast::<u8>().as_ptr(),
-            this.cast::<u8>().as_ptr(),
-            vtable.repr_layout.size(),
-        );
+        unsafe {
+            ptr::copy_nonoverlapping(
+                ptr.cast::<u8>().as_ptr(),
+                this.cast::<u8>().as_ptr(),
+                vtable.repr_layout.size(),
+            )
+        };
 
         Self(this)
     }
 
     #[inline(always)]
     unsafe fn _write(self, out_ptr: NonNull<MessageRepr>) {
-        ptr::copy_nonoverlapping(
-            self.0.cast::<u8>().as_ptr(),
-            out_ptr.cast::<u8>().as_ptr(),
-            self._vtable().repr_layout.size(),
-        );
+        unsafe {
+            ptr::copy_nonoverlapping(
+                self.0.cast::<u8>().as_ptr(),
+                out_ptr.cast::<u8>().as_ptr(),
+                self._vtable().repr_layout.size(),
+            )
+        };
 
-        dealloc_repr(self.0);
+        unsafe { dealloc_repr(self.0) };
 
         mem::forget(self);
     }
@@ -467,7 +471,7 @@ impl<'a> AnyMessageRef<'a> {
     }
 
     pub(crate) unsafe fn downcast_ref_unchecked<M: Message>(&self) -> &'a M {
-        let ret = self.inner.downcast_ref_unchecked();
+        let ret = unsafe { self.inner.downcast_ref_unchecked() };
 
         // SAFETY: we produce lifetime bound to the original `AnyMessage` or `Envelope`.
         unsafe { mem::transmute::<&M, &'a M>(ret) }

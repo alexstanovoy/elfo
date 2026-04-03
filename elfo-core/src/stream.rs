@@ -208,9 +208,9 @@ impl Stream<AnyMessage> {
         // Highly inspired by https://github.com/Riateche/stream_generator.
         // TODO: `mpsc::channel` produces overhead here, replace with a custom slot.
         let (tx, rx) = mpsc::channel(0);
-        let gen = generator(Emitter(tx));
-        let gen = stream::once(gen).filter_map(|_| async { None });
-        let stream = stream::select(gen, rx);
+        let gen_fut = generator(Emitter(tx));
+        let gen_stream = stream::once(gen_fut).filter_map(|_| async { None });
+        let stream = stream::select(gen_stream, rx);
 
         Self::from_futures03_inner(stream, false, false)
     }

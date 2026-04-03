@@ -65,7 +65,7 @@ impl Object {
         this: BorrowedObject<'_>,
         recipient: Addr,
         envelope: Envelope,
-    ) -> impl Future<Output = SendResult> + 'static {
+    ) -> impl Future<Output = SendResult> + use<> {
         let _ = recipient; // suppress a warning if the "network" feature is disabled
 
         match &this.kind {

@@ -80,7 +80,7 @@ pub trait Message:
     #[doc(hidden)]
     #[inline(always)]
     unsafe fn _from_any(any: AnyMessage) -> Self {
-        any.into_real()
+        unsafe { any.into_real() }
     }
 
     /// # Safety
@@ -89,7 +89,7 @@ pub trait Message:
     #[doc(hidden)]
     #[inline(always)]
     unsafe fn _from_any_ref(any: &AnyMessage) -> &Self {
-        any.as_real_ref()
+        unsafe { any.as_real_ref() }
     }
 
     /// # Safety
@@ -98,7 +98,7 @@ pub trait Message:
     #[doc(hidden)]
     #[inline(always)]
     unsafe fn _from_any_mut(any: &mut AnyMessage) -> &mut Self {
-        any.as_real_mut()
+        unsafe { any.as_real_mut() }
     }
 
     #[doc(hidden)]
@@ -118,8 +118,8 @@ pub trait Message:
     #[doc(hidden)]
     #[inline(always)]
     unsafe fn _read(ptr: NonNull<MessageRepr>) -> Self {
-        let data_ref = &ptr.cast::<MessageRepr<Self>>().as_ref().data;
-        ptr::read(data_ref)
+        let data_ref = &unsafe { ptr.cast::<MessageRepr<Self>>().as_ref() }.data;
+        unsafe { ptr::read(data_ref) }
     }
 
     /// # Safety
@@ -133,7 +133,7 @@ pub trait Message:
     #[inline(always)]
     unsafe fn _write(self, ptr: NonNull<MessageRepr>) {
         let repr = MessageRepr::new(self);
-        ptr::write(ptr.cast::<MessageRepr<Self>>().as_ptr(), repr);
+        unsafe { ptr::write(ptr.cast::<MessageRepr<Self>>().as_ptr(), repr) };
     }
 }
 

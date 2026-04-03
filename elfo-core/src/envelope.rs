@@ -276,10 +276,10 @@ impl Envelope {
         let (layout, message_offset) = envelope_repr_layout(message_layout);
         debug_assert_eq!(message_offset, self.header().message_offset);
 
-        let message = M::_read(self.message_repr_ptr());
-        let kind = ptr::read(&self.0.as_ref().kind);
+        let message = unsafe { M::_read(self.message_repr_ptr()) };
+        let kind = unsafe { ptr::read(&self.0.as_ref().kind) };
 
-        alloc::dealloc(self.0.as_ptr().cast(), layout);
+        unsafe { alloc::dealloc(self.0.as_ptr().cast(), layout) };
         mem::forget(self);
         (message, kind)
     }
@@ -364,7 +364,7 @@ pub trait EnvelopeBorrowed {
 impl EnvelopeOwned for Envelope {
     #[inline]
     unsafe fn unpack_regular_unchecked<M: Message>(self) -> M {
-        let (message, kind) = self.unpack_unchecked();
+        let (message, kind) = unsafe { self.unpack_unchecked() };
 
         #[cfg(feature = "network")]
         if let MessageKind::RequestAny(token) | MessageKind::RequestAll(token) = kind {
@@ -386,7 +386,7 @@ impl EnvelopeOwned for Envelope {
 
     #[inline]
     unsafe fn unpack_request_unchecked<R: Request>(self) -> (R, ResponseToken<R>) {
-        let (message, kind) = self.unpack_unchecked();
+        let (message, kind) = unsafe { self.unpack_unchecked() };
 
         let token = match kind {
             MessageKind::RequestAny(token) | MessageKind::RequestAll(token) => token,
@@ -402,7 +402,7 @@ impl EnvelopeOwned for Envelope {
 impl EnvelopeBorrowed for Envelope {
     #[inline]
     unsafe fn unpack_regular_unchecked<M: Message>(&self) -> &M {
-        self.message().downcast_ref_unchecked()
+        unsafe { self.message().downcast_ref_unchecked() }
     }
 }
 
