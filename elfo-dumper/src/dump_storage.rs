@@ -207,10 +207,10 @@ impl Fund {
 
         // If we have already reached the limit, try to find the most filled shard
         // and take its oldest part.
-        if self.part_count >= self.config.max_part_count {
-            if let Some(part) = self.clear_most_filled() {
-                return part;
-            }
+        if self.part_count >= self.config.max_part_count
+            && let Some(part) = self.clear_most_filled()
+        {
+            return part;
         }
 
         // Otherwise, we have only active parts or the limit hasn't reached,

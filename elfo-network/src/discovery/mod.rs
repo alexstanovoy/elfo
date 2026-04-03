@@ -171,12 +171,12 @@ impl Discovery {
 
     fn abort_connection(&mut self, conn_id: ConnId) {
         // Firstly, check if a connection is driven by this actor.
-        if let Some(handle) = self.conn_streams.remove(conn_id) {
-            if handle.terminate_by_ref() {
-                self.connman.on_connection_failed(conn_id);
-                // A connection is driven by this actor, so we don't need to notify a worker.
-                return;
-            }
+        if let Some(handle) = self.conn_streams.remove(conn_id)
+            && handle.terminate_by_ref()
+        {
+            self.connman.on_connection_failed(conn_id);
+            // A connection is driven by this actor, so we don't need to notify a worker.
+            return;
         }
 
         let conn = ward!(self.connman.get(conn_id));

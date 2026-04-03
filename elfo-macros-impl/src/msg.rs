@@ -45,16 +45,16 @@ fn extract_path_to_type(path: &Path) -> Path {
     //        ^- must be uppercased
     //
     // Yep, it's crazy, but it seems to be a good assumption for now.
-    if let Some(prev) = ident_rev_it.nth(1) {
-        if is_type_ident(&prev.ident) {
-            let mut path = path.clone();
-            path.segments.pop().unwrap();
+    if let Some(prev) = ident_rev_it.nth(1)
+        && is_type_ident(&prev.ident)
+    {
+        let mut path = path.clone();
+        path.segments.pop().unwrap();
 
-            // Convert `Pair::Punctuated` to `Pair::End`.
-            let (last, _) = path.segments.pop().unwrap().into_tuple();
-            path.segments.push(last);
-            return path;
-        }
+        // Convert `Pair::Punctuated` to `Pair::End`.
+        let (last, _) = path.segments.pop().unwrap().into_tuple();
+        path.segments.push(last);
+        return path;
     }
 
     path.clone()
